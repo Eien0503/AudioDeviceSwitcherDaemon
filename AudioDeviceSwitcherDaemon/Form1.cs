@@ -13,8 +13,9 @@ using NAudio.CoreAudioApi.Interfaces;
 using AudioSwitcher.AudioApi.CoreAudio;
 using NAudioPropertyKey = NAudio.CoreAudioApi.PropertyKey;
 using AudioSwitcherPropertyKey = AudioSwitcher.AudioApi.CoreAudio.PropertyKey;
+using System.Reflection.Emit;
 
-namespace cao
+namespace AudioDeviceSwitcherDaemon
 {
     public partial class Form1 : Form, IMMNotificationClient
     {
@@ -301,6 +302,11 @@ namespace cao
                 return true; // 表示已處理該按鍵
             }
             return base.ProcessCmdKey(ref msg, keyData); // 呼叫基底類別的 ProcessCmdKey 方法
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 

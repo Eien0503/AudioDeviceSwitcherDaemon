@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6B574D45-FC8F-4C1A-907F-9F4C6981A990}</ProjectGuid>
+    <ProjectGuid>{BC5E985D-505A-4C06-AF74-3C5B3E909887}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>cao</RootNamespace>
-    <AssemblyName>cao</AssemblyName>
+    <RootNamespace>AudioDeviceSwitcherDaemon</RootNamespace>
+    <AssemblyName>AudioDeviceSwitcherDaemon</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -137,6 +137,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="cao_TemporaryKey.pfx" />
     <None Include="packages.config" />
