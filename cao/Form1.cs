@@ -109,7 +109,7 @@ namespace cao
             contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("使用播放暫停鍵", null, (s, e) => SwitchHotKey(false));
             contextMenu.Items.Add("使用Pause Break鍵", null, (s, e) => SwitchHotKey(true));
-            contextMenu.Items.Add("Exit", null, (s, e) => this.Close());
+            contextMenu.Items.Add("Exit", null, (s, e) => ExitApplication());
 
             notifyIcon.Icon = new Icon("icon.ico"); // 設定為程式的圖示
             notifyIcon.ContextMenuStrip = contextMenu;
@@ -262,13 +262,32 @@ namespace cao
         {
 
         }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
+        private void ExitApplication()
         {
             UnregisterHotKey(this.Handle, HOTKEY_ID_PLAY_PAUSE); // 取消註冊播放暫停快捷鍵
             UnregisterHotKey(this.Handle, HOTKEY_ID_PAUSE_BREAK); // 取消註冊 Pause Break 快捷鍵
-            notifyIcon.Visible = false; // 隱藏通知圖示
-            base.OnFormClosing(e); // 呼叫基底類別的 OnFormClosing 方法
+
+            if (notifyIcon != null)
+            {
+                notifyIcon.Visible = false; // 隱藏通知圖示
+                notifyIcon.Dispose(); // 釋放通知圖示資源
+            }
+
+            Application.Exit(); // 關閉應用程式
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            e.Cancel = true; // 取消關閉動作
+            this.Hide(); // 隱藏視窗
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide(); // 隱藏視窗
+            }
         }
         private int GetAudioDeviceCount()
         {
