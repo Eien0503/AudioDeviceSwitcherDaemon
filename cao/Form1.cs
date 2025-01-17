@@ -22,11 +22,13 @@ namespace cao
         private MMDevice defaultDevice; // 預設音訊裝置
         private List<MMDevice> audioDevices; // 音訊裝置列表
         private int currentDeviceIndex; // 當前音訊裝置索引
-        private const int HOTKEY_ID = 1; // 快捷鍵 ID
+        private const int HOTKEY_ID_PLAY_PAUSE = 1; // 播放暫停快捷鍵 ID
+        private const int HOTKEY_ID_PAUSE_BREAK = 2; // Pause Break 快捷鍵 ID
         private const int WM_HOTKEY = 0x0312; // 快捷鍵訊息
         private CoreAudioController audioController; // 音訊控制器
         private NotifyIcon notifyIcon; // 系統通知區域圖示
         private ContextMenuStrip contextMenu; // 右鍵選單
+        private bool usePauseBreakKey; // 是否使用 Pause Break 鍵
 
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk); // 註冊全域快捷鍵
@@ -38,6 +40,7 @@ namespace cao
         {
             InitializeComponent(); // 初始化元件
             InitializeAudioDevice(); // 初始化音訊裝置
+            LoadSettings(); // 載入設定
             RegisterGlobalHotKey(); // 註冊全域快捷鍵
             InitializeNotifyIcon(); // 初始化通知圖示
         }
@@ -88,19 +91,69 @@ namespace cao
         {
             const uint MOD_NONE = 0x0000; // 無修飾鍵
             const uint VK_MEDIA_PLAY_PAUSE = 0xB3; // 媒體播放暫停鍵
-            RegisterHotKey(this.Handle, HOTKEY_ID, MOD_NONE, VK_MEDIA_PLAY_PAUSE); // 註冊全域快捷鍵
+            const uint VK_PAUSE = 0x13; // Pause Break 鍵
+
+            if (usePauseBreakKey)
+            {
+                RegisterHotKey(this.Handle, HOTKEY_ID_PAUSE_BREAK, MOD_NONE, VK_PAUSE); // 註冊 Pause Break 快捷鍵
+            }
+            else
+            {
+                RegisterHotKey(this.Handle, HOTKEY_ID_PLAY_PAUSE, MOD_NONE, VK_MEDIA_PLAY_PAUSE); // 註冊播放暫停快捷鍵
+            }
         }
 
         private void InitializeNotifyIcon()
         {
             notifyIcon = new NotifyIcon();
             contextMenu = new ContextMenuStrip();
+            contextMenu.Items.Add("使用播放暫停鍵", null, (s, e) => SwitchHotKey(false));
+            contextMenu.Items.Add("使用Pause Break鍵", null, (s, e) => SwitchHotKey(true));
             contextMenu.Items.Add("Exit", null, (s, e) => this.Close());
 
             notifyIcon.Icon = new Icon("icon.ico"); // 設定為程式的圖示
             notifyIcon.ContextMenuStrip = contextMenu;
             notifyIcon.Visible = true;
             notifyIcon.DoubleClick += (s, e) => this.Show();
+            UpdateContextMenu(); // 更新右鍵選單
+        }
+
+        private void SwitchHotKey(bool usePauseBreak)
+        {
+            usePauseBreakKey = usePauseBreak;
+            UnregisterHotKey(this.Handle, HOTKEY_ID_PLAY_PAUSE); // 取消註冊播放暫停快捷鍵
+            UnregisterHotKey(this.Handle, HOTKEY_ID_PAUSE_BREAK); // 取消註冊 Pause Break 快捷鍵
+            RegisterGlobalHotKey(); // 重新註冊快捷鍵
+            UpdateContextMenu(); // 更新右鍵選單
+            SaveSettings(); // 儲存設定
+        }
+
+        private void UpdateContextMenu()
+        {
+            foreach (ToolStripMenuItem item in contextMenu.Items)
+            {
+                item.Checked = false;
+            }
+
+            if (usePauseBreakKey)
+            {
+                ((ToolStripMenuItem)contextMenu.Items[1]).Checked = true; // 勾選 Pause Break 鍵
+            }
+            else
+            {
+                ((ToolStripMenuItem)contextMenu.Items[0]).Checked = true; // 勾選播放暫停鍵
+            }
+        }
+
+        private void LoadSettings()
+        {
+            usePauseBreakKey = Properties.Settings.Default.UsePauseBreakKey;
+        }
+
+        private void SaveSettings()
+        {
+            Properties.Settings.Default.UsePauseBreakKey = usePauseBreakKey;
+            Properties.Settings.Default.Save();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -111,9 +164,13 @@ namespace cao
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == HOTKEY_ID)
+            if (m.Msg == WM_HOTKEY)
             {
-                SwitchToNextAudioDevice(); // 切換到下一個音訊裝置
+                if ((m.WParam.ToInt32() == HOTKEY_ID_PLAY_PAUSE && !usePauseBreakKey) ||
+                    (m.WParam.ToInt32() == HOTKEY_ID_PAUSE_BREAK && usePauseBreakKey))
+                {
+                    SwitchToNextAudioDevice(); // 切換到下一個音訊裝置
+                }
             }
             base.WndProc(ref m); // 呼叫基底類別的 WndProc 方法
         }
@@ -161,7 +218,7 @@ namespace cao
             {
                 currentDeviceIndex = audioDevices.FindIndex(d => d.ID == defaultDeviceId); // 更新當前音訊裝置索引
                 UpdateDefaultAudioDevice(); // 更新預設音訊裝置
-                //RestartApplication(); // 重新啟動程式
+                                            //RestartApplication(); // 重新啟動程式
             }
         }
 
@@ -196,8 +253,8 @@ namespace cao
         public void OnDeviceStateChanged(string deviceId, DeviceState newState) // 當音訊裝置狀態改變事件
         {
             RestartApplication(); // 重新啟動程式
-            //UpdateDefaultAudioDevice(); // 更新預設音訊裝置
-            //UpdateAudioDevices(); // 更新音訊裝置列表
+                                  //UpdateDefaultAudioDevice(); // 更新預設音訊裝置
+                                  //UpdateAudioDevices(); // 更新音訊裝置列表
         }
         public void OnPropertyValueChanged(string pwstrDeviceId, NAudioPropertyKey key) { } // 音訊裝置屬性值改變事件
 
@@ -208,7 +265,8 @@ namespace cao
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            UnregisterHotKey(this.Handle, HOTKEY_ID); // 取消註冊全域快捷鍵
+            UnregisterHotKey(this.Handle, HOTKEY_ID_PLAY_PAUSE); // 取消註冊播放暫停快捷鍵
+            UnregisterHotKey(this.Handle, HOTKEY_ID_PAUSE_BREAK); // 取消註冊 Pause Break 快捷鍵
             notifyIcon.Visible = false; // 隱藏通知圖示
             base.OnFormClosing(e); // 呼叫基底類別的 OnFormClosing 方法
         }
