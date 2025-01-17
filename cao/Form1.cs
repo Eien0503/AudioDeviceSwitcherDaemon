@@ -97,7 +97,7 @@ namespace cao
             contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("Exit", null, (s, e) => this.Close());
 
-            notifyIcon.Icon = SystemIcons.Application;
+            notifyIcon.Icon = new Icon("icon.ico"); // 設定為程式的圖示
             notifyIcon.ContextMenuStrip = contextMenu;
             notifyIcon.Visible = true;
             notifyIcon.DoubleClick += (s, e) => this.Show();
