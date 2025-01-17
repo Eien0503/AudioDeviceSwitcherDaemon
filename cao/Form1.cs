@@ -25,6 +25,8 @@ namespace cao
         private const int HOTKEY_ID = 1; // 快捷鍵 ID
         private const int WM_HOTKEY = 0x0312; // 快捷鍵訊息
         private CoreAudioController audioController; // 音訊控制器
+        private NotifyIcon notifyIcon; // 系統通知區域圖示
+        private ContextMenuStrip contextMenu; // 右鍵選單
 
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk); // 註冊全域快捷鍵
@@ -37,6 +39,7 @@ namespace cao
             InitializeComponent(); // 初始化元件
             InitializeAudioDevice(); // 初始化音訊裝置
             RegisterGlobalHotKey(); // 註冊全域快捷鍵
+            InitializeNotifyIcon(); // 初始化通知圖示
         }
 
         private void InitializeAudioDevice()
@@ -86,6 +89,24 @@ namespace cao
             const uint MOD_NONE = 0x0000; // 無修飾鍵
             const uint VK_MEDIA_PLAY_PAUSE = 0xB3; // 媒體播放暫停鍵
             RegisterHotKey(this.Handle, HOTKEY_ID, MOD_NONE, VK_MEDIA_PLAY_PAUSE); // 註冊全域快捷鍵
+        }
+
+        private void InitializeNotifyIcon()
+        {
+            notifyIcon = new NotifyIcon();
+            contextMenu = new ContextMenuStrip();
+            contextMenu.Items.Add("Exit", null, (s, e) => this.Close());
+
+            notifyIcon.Icon = SystemIcons.Application;
+            notifyIcon.ContextMenuStrip = contextMenu;
+            notifyIcon.Visible = true;
+            notifyIcon.DoubleClick += (s, e) => this.Show();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            this.Hide(); // 隱藏視窗
         }
 
         protected override void WndProc(ref Message m)
@@ -138,6 +159,7 @@ namespace cao
         {
             if (flow == DataFlow.Render && role == Role.Multimedia)
             {
+                currentDeviceIndex = audioDevices.FindIndex(d => d.ID == defaultDeviceId); // 更新當前音訊裝置索引
                 UpdateDefaultAudioDevice(); // 更新預設音訊裝置
                 //RestartApplication(); // 重新啟動程式
             }
@@ -146,13 +168,13 @@ namespace cao
         public void OnDeviceAdded(string pwstrDeviceId)
         {
             //UpdateAudioDevices(); // 更新音訊裝置列表
-            RestartApplication(); // 重新啟動程式
+            //RestartApplication(); // 重新啟動程式
         }
 
         public void OnDeviceRemoved(string deviceId)
         {
             //UpdateAudioDevices(); // 更新音訊裝置列表
-            RestartApplication(); // 重新啟動程式
+            //RestartApplication(); // 重新啟動程式
         }
         private void RestartApplication()
         {
@@ -174,6 +196,7 @@ namespace cao
         public void OnDeviceStateChanged(string deviceId, DeviceState newState) // 當音訊裝置狀態改變事件
         {
             RestartApplication(); // 重新啟動程式
+            //UpdateDefaultAudioDevice(); // 更新預設音訊裝置
             //UpdateAudioDevices(); // 更新音訊裝置列表
         }
         public void OnPropertyValueChanged(string pwstrDeviceId, NAudioPropertyKey key) { } // 音訊裝置屬性值改變事件
@@ -186,6 +209,7 @@ namespace cao
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             UnregisterHotKey(this.Handle, HOTKEY_ID); // 取消註冊全域快捷鍵
+            notifyIcon.Visible = false; // 隱藏通知圖示
             base.OnFormClosing(e); // 呼叫基底類別的 OnFormClosing 方法
         }
         private int GetAudioDeviceCount()
