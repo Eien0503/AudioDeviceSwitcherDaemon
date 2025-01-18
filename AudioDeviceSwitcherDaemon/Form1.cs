@@ -236,6 +236,12 @@ namespace AudioDeviceSwitcherDaemon
         }
         private void RestartApplication()
         {
+            if (notifyIcon != null)
+            {
+                notifyIcon.Visible = false; // 隱藏通知圖示
+                notifyIcon.Dispose(); // 釋放通知圖示資源
+            }
+            Application.ExitThread(); // 確保所有執行緒都被正確關閉
             Application.Restart(); // 重新啟動應用程式
             Environment.Exit(0); // 結束當前執行的應用程式
         }
@@ -253,6 +259,11 @@ namespace AudioDeviceSwitcherDaemon
 
         public void OnDeviceStateChanged(string deviceId, DeviceState newState) // 當音訊裝置狀態改變事件
         {
+            if (notifyIcon != null)
+            {
+                notifyIcon.Visible = false; // 隱藏通知圖示
+                notifyIcon.Dispose(); // 釋放通知圖示資源
+            }
             RestartApplication(); // 重新啟動程式
                                   //UpdateDefaultAudioDevice(); // 更新預設音訊裝置
                                   //UpdateAudioDevices(); // 更新音訊裝置列表
