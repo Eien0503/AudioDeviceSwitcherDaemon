@@ -274,6 +274,7 @@ namespace AudioDeviceSwitcherDaemon
                 notifyIcon.Dispose(); // 釋放通知圖示資源
             }
 
+            Application.ExitThread(); // 確保所有執行緒都被正確關閉
             Application.Exit(); // 關閉應用程式
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
