@@ -14,6 +14,9 @@ using AudioSwitcher.AudioApi.CoreAudio;
 using NAudioPropertyKey = NAudio.CoreAudioApi.PropertyKey;
 using AudioSwitcherPropertyKey = AudioSwitcher.AudioApi.CoreAudio.PropertyKey;
 using System.Reflection.Emit;
+using Microsoft.Win32;
+using System.IO;
+using IWshRuntimeLibrary;
 
 namespace AudioDeviceSwitcherDaemon
 {
@@ -44,6 +47,34 @@ namespace AudioDeviceSwitcherDaemon
             LoadSettings(); // 載入設定
             RegisterGlobalHotKey(); // 註冊全域快捷鍵
             InitializeNotifyIcon(); // 初始化通知圖示
+            SetStartup(); // 設定隨開機啟動
+        }
+
+        private void SetStartup()
+        {
+            try
+            {
+                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                string shortcutPath = System.IO.Path.Combine(startupFolderPath, "AudioDeviceSwitcherDaemon.lnk");
+
+                if (!System.IO.File.Exists(shortcutPath))
+                {
+                    CreateShortcut(shortcutPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"設定隨開機啟動時發生錯誤: {ex.Message}");
+            }
+        }
+
+        private void CreateShortcut(string shortcutPath)
+        {
+            var shell = new WshShell();
+            var shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+            shortcut.TargetPath = Application.ExecutablePath;
+            shortcut.WorkingDirectory = Application.StartupPath;
+            shortcut.Save();
         }
 
         private void InitializeAudioDevice()
