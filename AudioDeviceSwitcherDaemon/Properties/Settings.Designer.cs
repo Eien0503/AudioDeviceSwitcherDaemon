@@ -34,5 +34,29 @@ namespace AudioDeviceSwitcherDaemon.Properties {
                 this["UsePauseBreakKey"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("pause")]
+        public string CustomHotKey {
+            get {
+                return ((string)(this["CustomHotKey"]));
+            }
+            set {
+                this["CustomHotKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseCustomKey {
+            get {
+                return ((bool)(this["UseCustomKey"]));
+            }
+            set {
+                this["UseCustomKey"] = value;
+            }
+        }
     }
 }

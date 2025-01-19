@@ -1,8 +1,14 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="cao.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="AudioDeviceSwitcherDaemon.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="UsePauseBreakKey" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CustomHotKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pause</Value>
+    </Setting>
+    <Setting Name="UseCustomKey" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
