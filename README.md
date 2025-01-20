@@ -1,4 +1,4 @@
-Copilot
+github Copilot製作
   
 可使用播放暫停鍵、pause break鍵、自訂快捷鍵切換音訊裝置  
 ![Desktop 2025 01 17 - 21 08 07 01 (online-video-cutter com)](https://github.com/user-attachments/assets/fc693dc2-75e8-4e5b-8605-d18e060aeaf0)
